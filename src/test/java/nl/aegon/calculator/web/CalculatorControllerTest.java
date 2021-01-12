@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.aegon.calculator.model.Calculation;
 import nl.aegon.calculator.model.Method;
 import nl.aegon.calculator.service.SimpleCalculator;
+import nl.aegon.calculator.web.dto.CalculationDto;
 import nl.aegon.calculator.web.transformer.CalculationTransformer;
 import org.assertj.core.util.Lists;
 import org.hamcrest.CoreMatchers;
@@ -16,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -77,5 +77,47 @@ class CalculatorControllerTest {
         //then
         assertThat(response.getStatus(), CoreMatchers.is(200));
         assertThat(response.getContentAsString(), Is.is("{\"id\":0,\"numberOne\":2,\"numberTwo\":3,\"method\":\"MULTIPLY\",\"result\":6.0}"));
+    }
+
+    @Test
+    void calculateDivideByZeroShouldReturnBadRequest() throws Exception {
+        //given
+        CalculationDto calculationDto = new CalculationDto();
+        calculationDto.setNumberOne(2);
+        calculationDto.setNumberTwo(0);
+        calculationDto.setMethod("DIVIDE");
+
+        //when
+        final ObjectMapper objectMapper = new Jackson2ObjectMapperBuilder().build();
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/calculator")
+                        .content(objectMapper.writeValueAsString(calculationDto))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
+
+        //then
+        assertThat(response.getStatus(), CoreMatchers.is(400));
+        assertThat(response.getContentAsString(), Is.is("Can't divide by zero."));
+    }
+
+    @Test
+    void calculateInvalidCalculationShouldReturnBadRequest() throws Exception {
+        //given
+        CalculationDto calculationDto = new CalculationDto();
+        calculationDto.setNumberOne(2);
+
+        //when
+        final ObjectMapper objectMapper = new Jackson2ObjectMapperBuilder().build();
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/calculator")
+                        .content(objectMapper.writeValueAsString(calculationDto))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
+
+        //then
+        assertThat(response.getStatus(), CoreMatchers.is(400));
+        assertThat(response.getContentAsString(), Is.is("Both numbers and method of calculation are required."));
     }
 }
