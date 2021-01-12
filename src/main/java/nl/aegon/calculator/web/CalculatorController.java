@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/calculator")
+@CrossOrigin
 public class CalculatorController {
     final SimpleCalculator simpleCalculator;
 
