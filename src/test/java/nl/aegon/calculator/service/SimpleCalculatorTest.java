@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -90,6 +91,20 @@ class SimpleCalculatorTest {
         //then
         assertEquals(0.5, actual.getResult());
         verify(calculationRepository).save(actual);
+    }
+
+    @Test
+    void calculateDivideByZero() {
+        //given
+        assertEquals(calculationRepository.count(), 0);
+        Calculation calculation = new Calculation();
+        calculation.setNumberOne(2);
+        calculation.setNumberTwo(0);
+        calculation.setMethod(Method.DIVIDE);
+
+        //when&then
+        assertThrows(ArithmeticException.class, () ->simpleCalculator.calculate(calculation));
+        assertEquals(calculationRepository.count(), 0);
     }
 
     @Test

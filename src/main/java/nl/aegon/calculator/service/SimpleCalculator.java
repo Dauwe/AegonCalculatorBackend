@@ -28,6 +28,9 @@ public class SimpleCalculator {
     }
 
     public double divide(int x, int y){
+        if(y==0){
+            throw new ArithmeticException();
+        }
         return (double)x / (double) y;
     }
 
@@ -60,7 +63,7 @@ public class SimpleCalculator {
     public Collection<Calculation> getCalculations(){
         Iterable<Calculation> iterable = calculationRepository.findAll();
 
-        ArrayList<Calculation> calculations = new ArrayList<Calculation>();
+        ArrayList<Calculation> calculations = new ArrayList<>();
         iterable.forEach(calculations::add);
 
         return calculations;
